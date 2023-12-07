@@ -1,5 +1,6 @@
-from matplotlib import pyplot as plt
 import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
 from io import BytesIO
 from flask import Flask, render_template, request, send_file
 
@@ -7,10 +8,12 @@ from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
-import numpy as np
+
+from scoreRoute import score
 
 
 app = Flask(__name__)
+app.register_blueprint(score, url_prefix='/score')
 
 
 @app.route("/")
@@ -123,10 +126,10 @@ def score_poly(degree):
 @app.route('/score/poly/graph')
 def score_poly_graph():
     degree = int(request.args['degree'])
-    X = score_poly(degree)[2]
-    y = score_poly(degree)[3]
     reg = score_poly(degree)[0]
     poly_reg = score_poly(degree)[1]
+    X = score_poly(degree)[2]
+    y = score_poly(degree)[3]
 
     # X 범위를 0.1단위로 생성
     X_range = np.arange(min(X), max(X), 0.1)
@@ -143,6 +146,17 @@ def score_poly_graph():
     plt.savefig(img, format="png", dpi=70)
     img.seek(0)
     return send_file(img, mimetype="image/png")
+
+#다항회귀 값 예측
+@app.route('/score/poly')
+def score_poly_value():
+    degree = int(request.args['degree'])
+    hour = float(request.args['hour'])
+    reg = score_poly(degree)[0]
+    poly_reg = score_poly(degree)[1]
+    pred = reg.predict(poly_reg.fit_transform([[hour]]))
+    return str(pred[0])
+
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
