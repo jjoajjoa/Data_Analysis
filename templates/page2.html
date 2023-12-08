@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block main_area %}
+  <div class="my-5">
+    <h1 class="text-center mb-5">줄거리가 내가좋아하는영화랑 비슷한거 추천하는 페이지</h1>
+    <div id="div_all" class="input-group"></div>
+    <div id="div_list" class="row"></div>
+  </div>
+
+  {% raw %}
+  <script id="temp_all" type="x-handlebars-template">
+    <input id="title" list="all" class="form-control">
+    <datalist id="all">
+        {{#each .}}
+            <option value="{{title}}"/>
+        {{/each}}
+    </datalist>
+    <button class="btn btn-dark">추천!</button>
+  </script>
+
+  <script id="temp_list" type="x-handlebars-template">
+    {{#each .}}
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="card">
+          <img src="{{image}}">
+          <div>{{title}}</div>
+        </div>
+      </div>
+    {{/each}}
+  </script>
+  {% endraw %}
+
+  <script>
+    getAll()
+    function getAll() {
+      $.ajax({
+        type: 'get',
+        url: '/movies.json',
+        dataType: 'json',
+        success: function (data) {
+            const temp = Handlebars.compile($("#temp_all").html());
+            $("#div_all").html(temp(data));
+        }
+      })
+    }
+
+    function getList() {
+      $.ajax({
+        type: "get",
+        url: "/movie2.json/" + $("#title").val(),
+        dataType: "json",
+        success: function(data) {
+          const temp = Handlebars.compile($("#temp_list").html());
+          $("#div_list").html(temp(data));
+        }
+      })
+    }
+
+    $("#div_all").on("click", ".btn", function() {
+      const title = $("#title").val();
+      if (title == ""){
+        alert("영화를 선택하세용!")
+      } else {
+        getList();
+      }
+    })
+  </script>
+{% endblock %}
