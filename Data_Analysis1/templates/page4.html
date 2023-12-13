@@ -1,0 +1,36 @@
+{%extends 'base.html'%}
+{%block main_area%}
+    <div class="my-5">
+        <h1 class="text-center mb-5">로지스틱회귀</h1>
+        <div class="text-center">
+            <img src="/score/logistic/graph">
+        </div>
+        <div>
+            <form name="frm">
+                <div class="input-group">
+                    <input name="hour" class="form-control" placeholder="공부시간을 입력하세용" type="number" min="0" max="20">
+                    <button class="btn btn-success">합격률 보기</button>
+                </div>
+            </form>
+            <div class="text-center mt-4">
+                <h3>예상 합격률은 <span id="prob" style="color:green">0</span>% 입니다!</h3>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(frm).on("submit", function (e) {
+            e.preventDefault();
+            if ($(frm.hour).val() == "") {
+                alert("시간을 입력하세용!");
+            }
+            $.ajax({
+                type: "get",
+                url: "/score/logistic/" + $(frm.hour).val(),
+                success: function (data) {
+                    const prob = Math.round(parseFloat(data) * 100);
+                    $("#prob").html(prob);
+                },
+            });
+        });
+    </script>
+{%endblock%}
